@@ -1,9 +1,14 @@
+// Global var for count of guesses
+var guessCount = 0;
+
 $(document).ready(function(){
   /*-- start new game --*/
     newGame();
 
   /*-- New game button feature --*/
     $('.new').click(function(){
+      // guessCount = 0;
+      // $('#userGuess').val('');
       newGame();
     });
 
@@ -19,6 +24,11 @@ $(document).ready(function(){
 
   // When the page loads, JavaScript should start a new game. Since you'll need to be able to start a new game when the user clicks the "New Game" button, you'll want to create a newGame function that does everything necessary to start a new game.
     function newGame() {
+      $('#feedback').text('Make your Guess!');
+      guessCount = 0;
+      $('#userGuess').val('');
+      $('#count').text('');
+      $('#guessList').empty();
       var number = getRandomInt();
       console.log(number + '!');
       getsAnswer(number);
@@ -31,54 +41,78 @@ $(document).ready(function(){
 
   // The user should get feedback about each guess – if it was too low, too high, or just right. This means that you'll need to write a named function that takes a user guess and determines which feedback to provide.
     function getsAnswer(number) {
-      $('#userGuess').keydown(function(event) {
+      $('#userGuess').off('keydown').on('keydown', function(event) {
         if (event.keyCode == 13) {
-          var guess = $('#userGuess').val();
-          compareAnswer(number, guess)
+          event.preventDefault();
+          console.log(number);
+          var guess = parseInt($(this).val(), 10);
+          if (!isNaN(guess)) {
+            compareAnswer(number, guess);
+          } else {
+            showMessage('Please enter a number:')
+          }
         }
       });
-    };
+
+      $('#guessButton').off('click').on('click', function(event) {
+        event.preventDefault();
+        var guess = parseInt($(this).val(), 10);
+        if (!isNaN(guess)) {
+          compareAnswer(number, guess);
+        } else {
+          showMessage('Please enter a number:')
+        }
+      });
+
+    }
 
     function compareAnswer(number, guess) {
       // console.log(guess);
       var comparision = Math.abs(number - guess);
-
-      console.log(comparision);
+      var message;
+      // console.log(comparision);
 
       if (comparision <= 10) {
-        console.log('hot');
-        var message = 'hot';
-      } else if ((comparision <= 20) && (comparision > 10)) {
-          console.log('getting warmer');
-          var message = 'getting warmer';
-        } else if ((comparision <= 30) && (comparision > 20)) {
-          console.log('warm');
-          var message = 'warm';
-        } else if ((comparision <= 40) && (comparision > 30)) {
-          console.log('cold');
-          var message = 'cold';
-        } else if ((comparision <= 50) && (comparision > 40)) {
-          console.log('ice cold');
-          var message = 'ice cold';
-        } else if (comparision > 50) {
-          console.log('frozen tundra');
-          var message = 'frozen tundra';
-        };
+        message = 'hot';
+      } else if (comparision <= 20) {
+        message = 'getting warmer';
+      } else if (comparision <= 30) {
+        message = 'warm';
+      } else if (comparision <= 40) {
+        message = 'cold';
+      } else if (comparision <= 50) {
+        message = 'ice cold';
+      } else if (comparision > 50) {
+        message = 'frozen tundra';
+      };
 
-        showAnswer(message);
-    };
+      console.log(message);
+      showMessage(message);
+    }
 
   // Feedback about the guess should appear in #feedback. By default, when the page loads, the text in this field is set to "Make Your Guess!"
-    function showAnswer(message) {
+    function showMessage(message) {
       $('h2#feedback').text(message);
+      trackGuesses();
     };
 
   // The game should track how many guesses the user has made. Feedback about this should appear in span#count (which defaults to 0, when the page loads).
     function trackGuesses() {
-
+      // jQuery.type( "test" ) === "string"
+      var condition = ($('#userGuess').val() != '');
+        if (condition)  {
+          guessCount ++;
+          showGuessNum();
+          console.log(guessCount);
+        };
     };
 
 
+  // The game should also supply users with a list of the numbers they have guessed so far. The CSS for this game is set up in such a way that you can simply add each guessed number as an <li> to ul#guessList.
+    function showGuessNum() {
+      $('#guessList').append('<li>' + guessCount + '</li>');
+      $('#count').text(guessCount);
+    };
 });
 
 
